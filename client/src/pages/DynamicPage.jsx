@@ -143,15 +143,6 @@ const DynamicPage = () => {
                 {entity === 'subject' && item.code && (
                   <p className="text-lg text-gray-600 mt-1">Code : {item.code}</p>
                 )}
-
-                {/* Show all only for classroom */}
-                {entity === 'classroom' && item.department && item.level && item.program && item.course && item.semester && (
-                  <div><p className="text-lg text-gray-600 mt-1">Department : {item.department}</p>
-                  <p className="text-lg text-gray-600 mt-1">Level : {item.level}</p>
-                  <p className="text-lg text-gray-600 mt-1">Program : {item.program}</p>
-                  <p className="text-lg text-gray-600 mt-1">Course : {item.course}</p>
-                  <p className="text-lg text-gray-600 mt-1">Semester : {item.semester}</p></div>
-                )}
               </div>
               <button
                 ref={el => buttonRefs.current[item.id] = el}
