@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import api from '../api/axiosConfig';
+
+
 
 const DynamicPage = () => {
   const { entity } = useParams();
@@ -60,35 +63,56 @@ const DynamicPage = () => {
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
-  // Placeholder data
-  const [items, setItems] = useState(
-    [
-      { id: 1, name: "Item-1", code: "11111", department: "CSE", level: "UG", program: "AICTE", course: "CSBS", semester: "5th" },
-      { id: 2, name: "Item-2", code: "22222", department: "ECE", level: "PG", program: "NEP", course: "EE", semester: "8th" },
-      { id: 3, name: "Item-3", code: "33333", department: "CSE", level: "UG", program: "AICTE", course: "CSBS", semester: "7th" },
-    ]
-  );
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/admin/${entity}s`);
+
+        setItems(response.data.data);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to fetch data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [entity]);
+
 
   const entityName = entity.charAt(0).toUpperCase() + entity.slice(1);
 
   const handleMenuToggle = (id, e) => {
     e.stopPropagation();
-    setShowMenu(prev => prev === id ? null : id);
+    setShowMenu(id);
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (newItemName.trim()) {
-      const newItem = {
-        id: Math.max(...items.map(item => item.id)) + 1,
-        name: newItemName,
-        ...(entity === 'subject' && { code: newSubjectCode })
-      };
-      setItems([...items, newItem]);
-      setNewItemName('');
-      setNewSubjectCode('');
-      setShowCreateModal(false);
+      try {
+        const payload = { name: newItemName };
+        if (entity === 'subject') {
+          payload.code = newSubjectCode;
+        }
+        
+        const response = await api.post(`/admin/${entity}s`, payload);
+
+        setItems([...items, response.data.data]);
+        setNewItemName('');
+        setNewSubjectCode('');
+        setShowCreateModal(false);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to create item');
+      }
     }
   };
+
 
   const handleUpdate = (item) => {
     setSelectedItem(item);
@@ -103,11 +127,22 @@ const DynamicPage = () => {
     setShowMenu(null);
   };
 
-  const handleConfirmDelete = () => {
-    const updatedItems = items.filter(item => item.id !== itemToDelete);
-    setItems(updatedItems);
-    setShowDeleteModal(false);
-    setItemToDelete(null);
+  const handleConfirmDelete = async (e) => {
+   
+
+    e.preventDefault();
+    try {
+      
+      await api.delete(`/admin/${entity}s/${itemToDelete}`);
+
+      const updatedItems = items.filter(item => item._id !== itemToDelete);
+      setItems(updatedItems);
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete item');
+    }
   };
 
   const handleCancelDelete = () => {
@@ -115,14 +150,26 @@ const DynamicPage = () => {
     setItemToDelete(null);
   };
 
-  const handleUpdateSubmit = (e) => {
+  const handleUpdateSubmit = async (e) => {
     e.preventDefault();
-    const updatedItems = items.map(item =>
-      item.id === selectedItem.id ? { ...item, name: editedName } : item
-    );
-    setItems(updatedItems);
-    setShowEditModal(false);
+    try {
+      const payload = { name: editedName };
+      if (entity === 'subject') {
+        payload.code = selectedItem.code;
+      }
+      
+      await api.put(`/admin/${entity}s/${selectedItem._id}`, payload);
+
+      const updatedItems = items.map(item =>
+        item._id === selectedItem._id ? { ...item, name: editedName } : item
+      );
+      setItems(updatedItems);
+      setShowEditModal(false);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update item');
+    }
   };
+
 
   return (
     <div className="p-6">
@@ -132,7 +179,7 @@ const DynamicPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map(item => (
           <div
-            key={item.id}
+            key={item._id}
             className="p-6 bg-white rounded-lg shadow-md relative"
           >
             <div className="flex justify-between items-start">
@@ -144,9 +191,11 @@ const DynamicPage = () => {
                   <p className="text-lg text-gray-600 mt-1">Code : {item.code}</p>
                 )}
               </div>
+
+              {/* 3 dot menu */}
               <button
-                ref={el => buttonRefs.current[item.id] = el}
-                onClick={(e) => handleMenuToggle(item.id, e)}
+                ref={el => buttonRefs.current[item._id] = el}
+                onClick={(e) => handleMenuToggle(item._id, e)}
                 className="text-gray-500 hover:text-gray-700 cursor-pointer"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -156,7 +205,7 @@ const DynamicPage = () => {
             </div>
 
             {/* Show menu on clicking 3 dot */}
-            {showMenu === item.id && (
+            {showMenu === item._id && (
               <div
                 ref={menuRef}
                 className="absolute right-4 top-12 bg-white border rounded-lg hover:overflow-hidden shadow-lg z-10"
@@ -168,7 +217,7 @@ const DynamicPage = () => {
                   Update
                 </button>
                 <button
-                  onClick={() => handleDeleteClick(item.id)}
+                  onClick={() => handleDeleteClick(item._id)}
                   className="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
                 >
                   Delete
@@ -248,7 +297,7 @@ const DynamicPage = () => {
               </button>
               <button
                 type="button"
-                onClick={handleConfirmDelete}
+                onClick={(e)=>handleConfirmDelete(e)}
                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Confirm
@@ -331,4 +380,3 @@ const DynamicPage = () => {
 };
 
 export default DynamicPage;
-
