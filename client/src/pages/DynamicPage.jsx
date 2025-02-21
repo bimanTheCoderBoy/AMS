@@ -144,7 +144,7 @@ const DynamicPage = () => {
                   <p className="text-lg text-gray-600 mt-1">Code : {item.code}</p>
                 )}
 
-                {/* Show code only for classroom */}
+                {/* Show all only for classroom */}
                 {entity === 'classroom' && item.department && item.level && item.program && item.course && item.semester && (
                   <div><p className="text-lg text-gray-600 mt-1">Department : {item.department}</p>
                   <p className="text-lg text-gray-600 mt-1">Level : {item.level}</p>
