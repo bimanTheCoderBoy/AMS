@@ -36,6 +36,15 @@ const ClassroomPage = () => {
     {
       id: 2,
       name: 'Classroom-2',
+      department: 'CSE',
+      level: 'UG',
+      program: 'AICTE',
+      course: 'CSBS',
+      semester: '5th',
+    },
+    {
+      id: 3,
+      name: 'Classroom-3',
       department: 'ECE',
       level: 'PG',
       program: 'NEP',
