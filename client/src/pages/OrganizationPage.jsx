@@ -5,13 +5,13 @@ const OrganizationPage = () => {
   const navigate = useNavigate();
   
   const cards = [
-    { title: 'Department', path: '/organization/department' },
-    { title: 'Level', path: '/organization/level' },
-    { title: 'Program', path: '/organization/program' },
-    { title: 'Course', path: '/organization/course' },
-    { title: 'Semester', path: '/organization/semester' },
-    { title: 'Subject', path: '/organization/subject' },
-    { title: 'Classroom', path: '/organization/classroom' }
+    { title: 'Department', path: '/admin/organization/department' },
+    { title: 'Level', path: '/admin/organization/level' },
+    { title: 'Program', path: '/admin/organization/program' },
+    { title: 'Course', path: '/admin/organization/course' },
+    { title: 'Semester', path: '/admin/organization/semester' },
+    { title: 'Subject', path: '/admin/organization/subject' },
+    { title: 'Classroom', path: '/admin/organization/classroom' }
   ];
 
   return (

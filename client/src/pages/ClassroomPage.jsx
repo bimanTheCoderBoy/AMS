@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
+import AddClassroom from '../components/classroom/AddClassroom';
+import UpdateClassroom from '../components/classroom/UpdateClassroom';
+import Loader from "../components/basic/Loader"
+import api from "../api/axiosConfig"
 
 const ClassroomPage = () => {
   const [showMenu, setShowMenu] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+
   const [selectedClassroom, setSelectedClassroom] = useState(null);
   const [editedName, setEditedName] = useState('');
   const [editedDepartment, setEditedDepartment] = useState('');
@@ -12,47 +17,30 @@ const ClassroomPage = () => {
   const [editedProgram, setEditedProgram] = useState('');
   const [editedCourse, setEditedCourse] = useState('');
   const [editedSemester, setEditedSemester] = useState('');
-  const [newClassroomName, setNewClassroomName] = useState('');
-  const [newDepartment, setNewDepartment] = useState('');
-  const [newLevel, setNewLevel] = useState('');
-  const [newProgram, setNewProgram] = useState('');
-  const [newCourse, setNewCourse] = useState('');
-  const [newSemester, setNewSemester] = useState('');
-  const [classroomToDelete, setClassroomToDelete] = useState(null);
   const menuRef = useRef(null);
   const buttonRefs = useRef({});
-
+  const [loading, setLoading]=useState(false)
+  const [error,setError]=useState(null)
   // Placeholder data for classrooms
-  const [classrooms, setClassrooms] = useState([
-    {
-      id: 1,
-      name: 'Classroom-1',
-      department: 'CSE',
-      level: 'UG',
-      program: 'AICTE',
-      course: 'CSBS',
-      semester: '5th',
-    },
-    {
-      id: 2,
-      name: 'Classroom-2',
-      department: 'CSE',
-      level: 'UG',
-      program: 'AICTE',
-      course: 'CSBS',
-      semester: '5th',
-    },
-    {
-      id: 3,
-      name: 'Classroom-3',
-      department: 'ECE',
-      level: 'PG',
-      program: 'NEP',
-      course: 'EE',
-      semester: '8th',
-    },
-  ]);
+  const [classrooms, setClassrooms] = useState([]);
 
+  //fetch All classrooms
+  const fetchAllClassrooms=async()=>{
+    try {
+      setLoading(true)
+     
+      const response=await api.get("/admin/classrooms");
+      console.log(response?.data?.data)
+      setClassrooms(response?.data?.data)
+      setLoading(false)
+      
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update item');
+    }
+  }
+useEffect(()=>{
+  fetchAllClassrooms()
+},[])
   // Handle clicks outside the menu and modals
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -90,33 +78,18 @@ const ClassroomPage = () => {
   };
 
   // Handle create new classroom
-  const handleCreate = () => {
-    if (
-      newClassroomName.trim() &&
-      newDepartment.trim() &&
-      newLevel.trim() &&
-      newProgram.trim() &&
-      newCourse.trim() &&
-      newSemester.trim()
-    ) {
-      const newClassroom = {
-        id: Math.max(...classrooms.map((c) => c.id)) + 1,
-        name: newClassroomName,
-        department: newDepartment,
-        level: newLevel,
-        program: newProgram,
-        course: newCourse,
-        semester: newSemester,
-      };
-      setClassrooms([...classrooms, newClassroom]);
-      setNewClassroomName('');
-      setNewDepartment('');
-      setNewLevel('');
-      setNewProgram('');
-      setNewCourse('');
-      setNewSemester('');
-      setShowCreateModal(false);
-    }
+  const handleCreate = (name, department, level, program, course, semester) => {
+    const newClassroom = {
+      id: Math.max(...classrooms.map((c) => c.id)) + 1,
+      name,
+      department,
+      level,
+      program,
+      course,
+      semester,
+    };
+    setClassrooms([...classrooms, newClassroom]);
+    setShowCreateModal(false);
   };
 
   // Handle update classroom
@@ -152,18 +125,17 @@ const ClassroomPage = () => {
   };
 
   // Handle update submit
-  const handleUpdateSubmit = (e) => {
-    e.preventDefault();
+  const handleUpdateSubmit = (name, department, level, program, course, semester) => {
     const updatedClassrooms = classrooms.map((c) =>
       c.id === selectedClassroom.id
         ? {
             ...c,
-            name: editedName,
-            department: editedDepartment,
-            level: editedLevel,
-            program: editedProgram,
-            course: editedCourse,
-            semester: editedSemester,
+            name,
+            department,
+            level,
+            program,
+            course,
+            semester,
           }
         : c
     );
@@ -172,28 +144,34 @@ const ClassroomPage = () => {
   };
 
   return (
-    <div className="p-6">
+    <>
+    {
+      loading?
+      <Loader loading={loading}/>
+      :
+      <div className="p-6">
+      
       <h1 className="text-2xl font-bold mb-6">Classrooms</h1>
 
       {/* Display classrooms */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {classrooms.map((classroom) => (
           <div
-            key={classroom.id}
+            key={classroom?._id}
             className="p-6 bg-white rounded-lg shadow-md relative"
           >
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">{classroom.name}</h2>
-                <p className="text-lg text-gray-600 mt-1">Department: {classroom.department}</p>
-                <p className="text-lg text-gray-600 mt-1">Level: {classroom.level}</p>
-                <p className="text-lg text-gray-600 mt-1">Program: {classroom.program}</p>
-                <p className="text-lg text-gray-600 mt-1">Course: {classroom.course}</p>
-                <p className="text-lg text-gray-600 mt-1">Semester: {classroom.semester}</p>
+                <p className="text-lg text-gray-600 mt-1">Department: {classroom?.department?.name}</p>
+                <p className="text-lg text-gray-600 mt-1">Level: {classroom.level.name}</p>
+                <p className="text-lg text-gray-600 mt-1">Program: {classroom.program.name}</p>
+                <p className="text-lg text-gray-600 mt-1">Course: {classroom.course.name}</p>
+                <p className="text-lg text-gray-600 mt-1">Semester: {classroom.semester.name}</p>
               </div>
               <button
-                ref={(el) => (buttonRefs.current[classroom.id] = el)}
-                onClick={(e) => handleMenuToggle(classroom.id, e)}
+                ref={(el) => (buttonRefs.current[classroom?._id] = el)}
+                onClick={(e) => handleMenuToggle(classroom?._id, e)}
                 className="text-gray-500 hover:text-gray-700 cursor-pointer"
               >
                 <svg
@@ -214,7 +192,7 @@ const ClassroomPage = () => {
             </div>
 
             {/* Show menu on clicking 3 dot */}
-            {showMenu === classroom.id && (
+            {showMenu === classroom?._id && (
               <div
                 ref={menuRef}
                 className="absolute right-4 top-12 bg-white border rounded-lg hover:overflow-hidden shadow-lg z-10"
@@ -226,7 +204,7 @@ const ClassroomPage = () => {
                   Update
                 </button>
                 <button
-                  onClick={() => handleDeleteClick(classroom.id)}
+                  onClick={() => handleDeleteClick(classroom?._id)}
                   className="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
                 >
                   Delete
@@ -237,178 +215,20 @@ const ClassroomPage = () => {
         ))}
       </div>
 
-      {/* Create Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Create New Classroom</h2>
-            <form onSubmit={(e) => e.preventDefault()}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Classroom Name</label>
-                <input
-                  type="text"
-                  value={newClassroomName}
-                  onChange={(e) => setNewClassroomName(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Department</label>
-                <input
-                  type="text"
-                  value={newDepartment}
-                  onChange={(e) => setNewDepartment(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Level</label>
-                <input
-                  type="text"
-                  value={newLevel}
-                  onChange={(e) => setNewLevel(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Program</label>
-                <input
-                  type="text"
-                  value={newProgram}
-                  onChange={(e) => setNewProgram(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Course</label>
-                <input
-                  type="text"
-                  value={newCourse}
-                  onChange={(e) => setNewCourse(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Semester</label>
-                <input
-                  type="text"
-                  value={newSemester}
-                  onChange={(e) => setNewSemester(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCreate}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 cursor-pointer"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Add Classroom Modal */}
+      {/* <AddClassroom 
+        showCreateModal={showCreateModal} 
+        setShowCreateModal={setShowCreateModal} 
+        handleCreate={handleCreate} 
+      /> */}
 
-      {/* Update Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Update Classroom</h2>
-            <form onSubmit={handleUpdateSubmit}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Classroom Name</label>
-                <input
-                  type="text"
-                  value={editedName}
-                  onChange={(e) => setEditedName(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Department</label>
-                <input
-                  type="text"
-                  value={editedDepartment}
-                  onChange={(e) => setEditedDepartment(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Level</label>
-                <input
-                  type="text"
-                  value={editedLevel}
-                  onChange={(e) => setEditedLevel(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Program</label>
-                <input
-                  type="text"
-                  value={editedProgram}
-                  onChange={(e) => setEditedProgram(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Course</label>
-                <input
-                  type="text"
-                  value={editedCourse}
-                  onChange={(e) => setEditedCourse(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Semester</label>
-                <input
-                  type="text"
-                  value={editedSemester}
-                  onChange={(e) => setEditedSemester(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Update Classroom Modal */}
+      <UpdateClassroom 
+        showEditModal={showEditModal} 
+        setShowEditModal={setShowEditModal} 
+        handleUpdateSubmit={handleUpdateSubmit} 
+        selectedClassroom={selectedClassroom} 
+      />
 
       {/* Delete Modal */}
       {showDeleteModal && (
@@ -457,7 +277,9 @@ const ClassroomPage = () => {
         </svg>
       </button>
     </div>
-  );
+}
+    </>
+  )
 };
 
 export default ClassroomPage;

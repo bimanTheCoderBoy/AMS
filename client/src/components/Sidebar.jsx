@@ -8,7 +8,7 @@ const Sidebar = () => {
         <ul className="space-y-2">
           <li>
             <Link 
-              to="/organization" 
+              to="/admin/organization" 
               className="block p-2 hover:bg-gray-700 rounded"
             >
               Organization
@@ -16,7 +16,7 @@ const Sidebar = () => {
           </li>
           <li>
             <Link 
-              to="/student" 
+              to="/admin/student" 
               className="block p-2 hover:bg-gray-700 rounded"
             >
               Student
@@ -24,7 +24,7 @@ const Sidebar = () => {
           </li>
           <li>
             <Link 
-              to="/schedule" 
+              to="/admin/schedule" 
               className="block p-2 hover:bg-gray-700 rounded"
             >
               Schedule

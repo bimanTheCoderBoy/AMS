@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from "react-hot-toast";
 
 const api = axios.create({
   baseURL: 'http://localhost:8080/api',
@@ -27,15 +28,23 @@ api.interceptors.response.use(
       // Handle specific status codes
       switch (error.response.status) {
         case 401:
-          // Handle unauthorized access
+          toast.error("Unauthorized access. Please log in.");
           break;
         case 404:
-          // Handle not found errors
+          toast.error("Requested resource not found.");
+          break;
+        case 400:
+          toast.error("Bad request. Please check your input.");
+          break;
+        case 500:
+          toast.error("Internal server error. Please try again later.");
           break;
         default:
-          // Handle other errors
+          toast.error("An unexpected error occurred.");
           break;
       }
+    } else {
+      toast.error("Network error. Please check your connection.");
     }
     return Promise.reject(error);
   }

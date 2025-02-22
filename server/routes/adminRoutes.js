@@ -3,8 +3,6 @@ const adminController = require('../controllers/adminController');
 
 const router = express.Router();
 
-// test routes
-router.get('/admintest', adminController.test);
 
 // Department routes
 router.post('/departments', adminController.createDepartment);
@@ -45,7 +43,7 @@ router.delete('/subjects/:id', adminController.deleteSubject);
 // Classroom routes
 router.post('/classrooms', adminController.createClassroom);
 router.get('/classrooms', adminController.getAllClassrooms);
-router.get('/classrooms/:id', adminController.getClassroom);
+// router.get('/classrooms/:id', adminController.getClassroom);
 router.put('/classrooms/:id', adminController.updateClassroom);
 router.delete('/classrooms/:id', adminController.deleteClassroom);
 

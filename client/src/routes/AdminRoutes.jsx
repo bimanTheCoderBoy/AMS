@@ -5,11 +5,13 @@ import ClassroomPage from '../pages/ClassroomPage';
 
 const AdminRoutes = () => (
     <Routes>
-        <Route path="/organization" element={<OrganizationPage />} />
-        <Route path="/organization/:entity" element={<DynamicPage />} />
-        <Route path="/organization/classroom" element={<ClassroomPage />} />
-        <Route path="/student" element={<div className="p-6">Student Page</div>} />
-        <Route path="/schedule" element={<div className="p-6">Schedule Page</div>} />
+       
+        <Route path="/admin/organization" element={<OrganizationPage />} />
+        <Route path="/admin/organization/:entity" element={<DynamicPage />} />
+        <Route path="/admin/organization/classroom" element={<ClassroomPage />} />
+        <Route path="/admin/student" element={<div className="p-6">Student Page</div>} />
+        <Route path="/admin/schedule" element={<div className="p-6">Schedule Page</div>} />
+
     </Routes>
 );
 

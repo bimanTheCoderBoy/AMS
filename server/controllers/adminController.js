@@ -12,6 +12,12 @@ const Class = require('../models/Class');
 const Admin = require('../models/Admin');
 const Teacher = require('../models/Teacher');
 
+const classroomController =require("./admin/classroomController")
+
+exports.createClassroom=classroomController.createClassroom
+exports.getAllClassrooms=classroomController.getAllClassrooms
+exports.updateClassroom=classroomController.updateClassroom
+exports.deleteClassroom=classroomController.deleteClassroom
 
 //! department CRUD operations
 exports.createDepartment = catchAsync(async (req, res, next) => {
@@ -396,104 +402,6 @@ exports.deleteSubject = catchAsync(async (req, res, next) => {
 });
 
 
-//! Classroom CRUD operations
-exports.createClassroom = catchAsync(async (req, res, next) => {
-    const { dept_id, level_id, program_id, course_id, semester_id } = req.body;
-
-    if (!dept_id || !level_id || !program_id || !course_id || !semester_id) {
-        return next(new ApiError("All fields are required: dept_id, level_id, program_id, course_id, semester_id", 400));
-    }
-
-    const [deptExists, levelExists, programExists, courseExists, semesterExists] = await Promise.all([
-        Department.findById(dept_id),
-        Level.findById(level_id),
-        Program.findById(program_id),
-        Course.findById(course_id),
-        Semester.findById(semester_id)
-    ]);
-
-    if (!deptExists) return next(new ApiError("Invalid dept_id: Department not found", 400));
-    if (!levelExists) return next(new ApiError("Invalid level_id: Level not found", 400));
-    if (!programExists) return next(new ApiError("Invalid program_id: Program not found", 400));
-    if (!courseExists) return next(new ApiError("Invalid course_id: Course not found", 400));
-    if (!semesterExists) return next(new ApiError("Invalid semester_id: Semester not found", 400));
-
-
-    const classroom = await Classroom.create({ dept_id, level_id, program_id, course_id, semester_id });
-
-    res.status(201).json({
-        status: 'success',
-        data: classroom
-    });
-});
-
-exports.getAllClassrooms = catchAsync(async (req, res, next) => {
-    const classrooms = await Classroom.find()
-        .populate('dept_id')    // Populate Department
-        .populate('level_id')   // Populate Level
-        .populate('program_id') // Populate Program
-        .populate('course_id')  // Populate Course
-        .populate('semester_id'); // Populate Semester
-
-    res.status(200).json({
-        status: 'success',
-        results: classrooms.length,
-        data: classrooms
-    });
-});
-
-exports.getClassroom = catchAsync(async (req, res, next) => {
-    const classroom = await Classroom.findById(req.params.id)
-        .populate('dept_id') // Populate department details
-        .populate('level_id') // Populate level details
-        .populate('program_id') // Populate program details
-        .populate('course_id') // Populate full course details
-        .populate('semester_id'); // Populate full semester details
-
-    if (!classroom) {
-        return next(new ApiError('Classroom not found', 404));
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: classroom
-    });
-});
-
-
-exports.updateClassroom = catchAsync(async (req, res, next) => {
-    const { dept_id, level_id, program_id, course_id, semester_id } = req.body;
-
-    const classroom = await Classroom.findByIdAndUpdate(
-        req.params.id,
-        { dept_id, level_id, program_id, course_id, semester_id },
-        { new: true, runValidators: true }
-    );
-
-    if (!classroom) {
-        return next(new ApiError('Classroom not found', 404));
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: classroom
-    });
-});
-
-exports.deleteClassroom = catchAsync(async (req, res, next) => {
-    const classroom = await Classroom.findByIdAndDelete(req.params.id);
-
-    if (!classroom) {
-        return next(new ApiError('Classroom not found', 404));
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: 'successfully deleted'
-    });
-});
-
-
 //! Class CRUD operations
 exports.getAllClasses = catchAsync(async (req, res, next) => {
     const classes = await Class.find()
@@ -837,12 +745,3 @@ exports.deleteAdmin = catchAsync(async (req, res, next) => {
     });
 });
 
-
-// test
-exports.test = async (req, res, next) => {
-    
-    res.status(200).json({
-      status: 'success',
-      data: "admin test"
-    });
-};
