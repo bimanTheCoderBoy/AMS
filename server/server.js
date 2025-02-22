@@ -11,7 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/teacher', require('./routes/teacherRoutes'));
+app.use('/api/student', require('./routes/studentRoutes'));
 
 // Error handling
 app.use(errorHandler);
