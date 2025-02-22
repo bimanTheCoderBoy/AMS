@@ -10,18 +10,19 @@ const Classroom = require('../../models/Classroom');
 
 //! Classroom CRUD operations
 exports.createClassroom = catchAsync(async (req, res, next) => {
-    const { dept_id, level_id, program_id, course_id, semester_id } = req.body;
+    const {name, dept_id, level_id, program_id, course_id, semester_id } = req.body;
 
     if (!dept_id || !level_id || !program_id || !course_id || !semester_id) {
         return next(new ApiError("All fields are required: dept_id, level_id, program_id, course_id, semester_id", 400));
     }
 
-    const [deptExists, levelExists, programExists, courseExists, semesterExists] = await Promise.all([
+    const [deptExists, levelExists, programExists, courseExists, semesterExists, classroomExists] = await Promise.all([
         Department.findById(dept_id),
         Level.findById(level_id),
         Program.findById(program_id),
         Course.findById(course_id),
-        Semester.findById(semester_id)
+        Semester.findById(semester_id),
+        Classroom.findOne({dept_id,program_id,course_id,semester_id,level_id})
     ]);
 
     if (!deptExists) return next(new ApiError("Invalid dept_id: Department not found", 400));
@@ -29,9 +30,10 @@ exports.createClassroom = catchAsync(async (req, res, next) => {
     if (!programExists) return next(new ApiError("Invalid program_id: Program not found", 400));
     if (!courseExists) return next(new ApiError("Invalid course_id: Course not found", 400));
     if (!semesterExists) return next(new ApiError("Invalid semester_id: Semester not found", 400));
+    if (classroomExists) return next(new ApiError("Classroom allready Exist", 400));
 
 
-    const classroom = await Classroom.create({ dept:dept_id, level:level_id, program:program_id, course:course_id, semester_id });
+    const classroom = await Classroom.create({ name, dept_id,level_id,program_id, course_id, semester_id });
 
     res.status(201).json({
         status: 'success',

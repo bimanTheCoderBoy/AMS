@@ -34,7 +34,7 @@ api.interceptors.response.use(
           toast.error("Requested resource not found.");
           break;
         case 400:
-          toast.error("Bad request. Please check your input.");
+          toast.error(error.response.message);
           break;
         case 500:
           toast.error("Internal server error. Please try again later.");
