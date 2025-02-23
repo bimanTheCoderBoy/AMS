@@ -11,8 +11,9 @@ const AdminRoutes = () => (
         <Route path="/admin/organization/:entity" element={<DynamicPage />} />
         <Route path="/admin/organization/classroom" element={<ClassroomPage />} />
         <Route path="/admin/organization/classroom/:id" element={<DetailedClassroom />} />
-        <Route path="/admin/student" element={<div className="p-6">Student Page</div>} />
-        <Route path="/admin/schedule" element={<div className="p-6">Schedule Page</div>} />
+        <Route path="/admin/students" element={<div className="p-6">Student Page</div>} />
+        <Route path="/admin/teachers" element={<div className="p-6">teacher page</div>} />
+        <Route path="/admin/teave-days" element={<div className="p-6">Schedule Page</div>} />
 
     </Routes>
 );
