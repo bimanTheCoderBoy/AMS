@@ -4,20 +4,14 @@ import UpdateClassroom from "../components/classroom/UpdateClassroom";
 import Loader from "../components/basic/Loader";
 import api from "../api/axiosConfig";
 import ClassroomCard from "../components/classroom/ClassroomCard";
-
+import toast from "react-hot-toast";
 const ClassroomPage = () => {
   const [showMenu, setShowMenu] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-
+const [classroomToDelete,setClassroomToDelete]=useState(null)
   const [selectedClassroom, setSelectedClassroom] = useState(null);
-  const [editedName, setEditedName] = useState("");
-  const [editedDepartment, setEditedDepartment] = useState("");
-  const [editedLevel, setEditedLevel] = useState("");
-  const [editedProgram, setEditedProgram] = useState("");
-  const [editedCourse, setEditedCourse] = useState("");
-  const [editedSemester, setEditedSemester] = useState("");
   const menuRef = useRef(null);
   const buttonRefs = useRef({});
   const [loading, setLoading] = useState(false);
@@ -82,19 +76,13 @@ const ClassroomPage = () => {
   };
 
   // Handle create new classroom
-  const handleCreate = () => {
+  const handleupdateUIChnage = () => {
     fetchAllClassrooms();
   };
 
   // Handle update classroom
   const handleUpdate = (classroom) => {
-    setSelectedClassroom(classroom);
-    setEditedName(classroom.name);
-    setEditedDepartment(classroom.department);
-    setEditedLevel(classroom.level);
-    setEditedProgram(classroom.program);
-    setEditedCourse(classroom.course);
-    setEditedSemester(classroom.semester);
+    setSelectedClassroom((prev)=>classroom);
     setShowEditModal(true);
     setShowMenu(null);
   };
@@ -106,11 +94,21 @@ const ClassroomPage = () => {
     setShowMenu(null);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async() => {
     const updatedClassrooms = classrooms.filter(
-      (c) => c.id !== classroomToDelete
+      (c) => c._id !== classroomToDelete
     );
     setClassrooms(updatedClassrooms);
+    
+    const response = await api.delete(`/admin/classrooms/${classroomToDelete}`);
+
+    if (response.status === 200) {
+      toast.success("Classroom Deleted successfully");
+    } else {
+      toast.error("Failed to delete classroom");
+    }
+
+   
     setShowDeleteModal(false);
     setClassroomToDelete(null);
   };
@@ -118,32 +116,6 @@ const ClassroomPage = () => {
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setClassroomToDelete(null);
-  };
-
-  // Handle update submit
-  const handleUpdateSubmit = (
-    name,
-    department,
-    level,
-    program,
-    course,
-    semester
-  ) => {
-    const updatedClassrooms = classrooms.map((c) =>
-      c.id === selectedClassroom.id
-        ? {
-            ...c,
-            name,
-            department,
-            level,
-            program,
-            course,
-            semester,
-          }
-        : c
-    );
-    setClassrooms(updatedClassrooms);
-    setShowEditModal(false);
   };
 
   return (
@@ -176,15 +148,15 @@ const ClassroomPage = () => {
           <AddClassroom 
         showCreateModal={showCreateModal} 
         setShowCreateModal={setShowCreateModal} 
-        handleCreate={handleCreate} 
+        handleupdateUIChnage={handleupdateUIChnage} 
       />
 
           {/* Update Classroom Modal */}
           <UpdateClassroom
             showEditModal={showEditModal}
             setShowEditModal={setShowEditModal}
-            handleUpdateSubmit={handleUpdateSubmit}
             selectedClassroom={selectedClassroom}
+            handleupdateUIChnage={handleupdateUIChnage}
           />
 
           {/* Delete Modal */}

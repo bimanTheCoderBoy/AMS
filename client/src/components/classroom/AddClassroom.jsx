@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 const AddClassroom = ({
   showCreateModal,
   setShowCreateModal,
-  handleCreate,
+  handleupdateUIChnage,
 }) => {
   const [newClassroomName, setNewClassroomName] = useState("");
   const [newDepartment, setNewDepartment] = useState("");
@@ -28,7 +28,7 @@ const AddClassroom = ({
     });
 
     if (response.status === 201) {
-      handleCreate();
+      handleupdateUIChnage();
       setNewClassroomName("");
       setNewDepartment("");
       setNewLevel("");
@@ -36,7 +36,7 @@ const AddClassroom = ({
       setNewCourse("");
       setNewSemester("");
       setShowCreateModal(false);
-      toast.success("Classroom Added Successfully")
+      toast.success("Classroom Added Successfully");
     }
   };
 
@@ -51,12 +51,13 @@ const AddClassroom = ({
                 Classroom Name
               </label>
               <input
-                type="text"
-                value={newClassroomName}
-                onChange={(e) => setNewClassroomName(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              />
+  type="text"
+  value={newClassroomName}
+  onChange={(e) => setNewClassroomName(e.target.value)}
+  className="w-full p-2 border-2 border-gray-200 rounded-md focus:ring-2 focus:ring-transparent focus:border-blue-400 transition-colors placeholder-gray-400 focus:outline-none"
+  placeholder="Enter classroom name"
+  required
+/>
             </div>
             <Dropdown
               label="Department"

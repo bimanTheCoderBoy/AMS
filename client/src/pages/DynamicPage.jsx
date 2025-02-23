@@ -244,7 +244,7 @@ const DynamicPage = () => {
                   type="text"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-2 border-2 text-[#1e293b] border-gray-200 rounded-md focus:ring-2 focus:ring-transparent focus:border-blue-400 transition-colors placeholder-gray-400 focus:outline-none"
                   required
                 />
               </div>
@@ -258,7 +258,7 @@ const DynamicPage = () => {
                     type="text"
                     value={selectedItem?.code || ''}
                     onChange={(e) => setSelectedItem(prev => ({ ...prev, code: e.target.value }))}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border-2 text-[#1e293b] border-gray-200 rounded-md focus:ring-2 focus:ring-transparent focus:border-blue-400 transition-colors placeholder-gray-400 focus:outline-none"
                     required
                   />
                 </div>
@@ -326,7 +326,7 @@ const DynamicPage = () => {
                   type="text"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-2 border-2 text-[#1e293b] border-gray-200 rounded-md focus:ring-2 focus:ring-transparent focus:border-blue-400 transition-colors placeholder-gray-400 focus:outline-none"
                   required
                 />
               </div>
@@ -341,7 +341,7 @@ const DynamicPage = () => {
                     type="text"
                     value={newSubjectCode}
                     onChange={(e) => setNewSubjectCode(e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border-2 text-[#1e293b] border-gray-200 rounded-md focus:ring-2 focus:ring-transparent focus:border-blue-400 transition-colors placeholder-gray-400 focus:outline-none"
                     required={entity === 'subject'}
                   />
                 </div>

@@ -12,8 +12,8 @@ const Classroom = require('../../models/Classroom');
 exports.createClassroom = catchAsync(async (req, res, next) => {
     const {name, dept_id, level_id, program_id, course_id, semester_id } = req.body;
 
-    if (!dept_id || !level_id || !program_id || !course_id || !semester_id) {
-        return next(new ApiError("All fields are required: dept_id, level_id, program_id, course_id, semester_id", 400));
+    if (!name || !dept_id || !level_id || !program_id || !course_id || !semester_id) {
+        return next(new ApiError("All fields are required: name, dept_id, level_id, program_id, course_id, semester_id", 400));
     }
 
     const [deptExists, levelExists, programExists, courseExists, semesterExists, classroomExists] = await Promise.all([
@@ -127,17 +127,41 @@ exports.getAllClassrooms = catchAsync(async (req, res, next) => {
 });
 
 exports.getClassroom = catchAsync(async (req, res, next) => {
-    const classroom = await Classroom.findById(req.params.id)
-        .populate('dept_id') // Populate department details
-        .populate('level_id') // Populate level details
-        .populate('program_id') // Populate program details
-        .populate('course_id') // Populate full course details
-        .populate('semester_id'); // Populate full semester details
+    let classroom = await Classroom.findById(req.params.id)
+        .populate('dept_id') 
+        .populate('level_id') 
+        .populate('program_id') 
+        .populate('course_id') 
+        .populate('semester_id'); 
 
     if (!classroom) {
         return next(new ApiError('Classroom not found', 404));
     }
 
+    classroom={
+      _id:classroom._id,
+      name:classroom.name,
+      department:{
+        _id:classroom.dept_id._id,
+        name:classroom.dept_id.name
+      },
+      level:{
+        _id:classroom.level_id._id,
+        name:classroom.level_id.name
+      },
+      program:{
+        _id:classroom.program_id._id,
+        name:classroom.program_id.name
+      }, 
+      semester:{
+        _id:classroom.semester_id._id,
+        name:classroom.semester_id.name
+      },
+      course:{
+        _id:classroom.course_id._id,
+        name : classroom.course_id.name
+      }
+    }
     res.status(200).json({
         status: 'success',
         data: classroom
@@ -146,11 +170,27 @@ exports.getClassroom = catchAsync(async (req, res, next) => {
 
 
 exports.updateClassroom = catchAsync(async (req, res, next) => {
-    const { dept_id, level_id, program_id, course_id, semester_id } = req.body;
+    const {name, dept_id, level_id, program_id, course_id, semester_id } = req.body;
+
+    const [deptExists, levelExists, programExists, courseExists, semesterExists, classroomExists] = await Promise.all([
+      Department.findById(dept_id),
+      Level.findById(level_id),
+      Program.findById(program_id),
+      Course.findById(course_id),
+      Semester.findById(semester_id),
+      Classroom.findById(req.params.id)
+  ]);
+
+  if (!deptExists) return next(new ApiError("Invalid dept_id: Department not found", 400));
+  if (!levelExists) return next(new ApiError("Invalid level_id: Level not found", 400));
+  if (!programExists) return next(new ApiError("Invalid program_id: Program not found", 400));
+  if (!courseExists) return next(new ApiError("Invalid course_id: Course not found", 400));
+  if (!semesterExists) return next(new ApiError("Invalid semester_id: Semester not found", 400));
+  if (!classroomExists) return next(new ApiError("Classroom not found", 400));
 
     const classroom = await Classroom.findByIdAndUpdate(
         req.params.id,
-        { dept_id, level_id, program_id, course_id, semester_id },
+        { dept_id, level_id, program_id, course_id, semester_id , name},
         { new: true, runValidators: true }
     );
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import Select from 'react-select';
 import api from '../../api/axiosConfig';
-import Loader from '../basic/Loader';
+
 
 const Dropdown = ({ label, apiEndpoint, selectedValue, onChange }) => {
   const [options, setOptions] = useState([]);
@@ -11,7 +12,11 @@ const Dropdown = ({ label, apiEndpoint, selectedValue, onChange }) => {
     const fetchOptions = async () => {
       try {
         const response = await api.get(apiEndpoint);
-        setOptions(response.data.data);
+        const formattedOptions = response.data.data.map(option => ({
+          value: option._id,
+          label: option.name
+        }));
+        setOptions(formattedOptions);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -20,29 +25,69 @@ const Dropdown = ({ label, apiEndpoint, selectedValue, onChange }) => {
     };
 
     fetchOptions();
-  }, []);
+  }, [apiEndpoint]);
 
-  if (loading) return <div className='my-10 w-full flex justify-center'> <Loader loading={loading} size={20}/></div>;
-  if (error) return <p>Error: {error}</p>;
+  const handleChange = (selectedOption) => {
+    onChange(selectedOption.value);
+  };
+
+  const selectedOption = options.find(option => option.value === selectedValue);
 
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium mb-2">{label}</label>
-      <select
-        value={selectedValue}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full p-2 border rounded-md"
-        required
-      >
-        <option value="">Select {label}</option>
-        {options.map((option) => (
-          <option key={option._id} value={option._id}>
-            {option.name}
-          </option>
-        ))}
-      </select>
+      <label className="block text-sm font-medium mb-2 text-gray-700">
+        {label}
+      </label>
+      <Select
+        value={selectedOption}
+        onChange={handleChange}
+        options={options}
+        placeholder={`Select ${label}`}
+        isSearchable
+        isLoading={loading}
+        loadingMessage={() => "Loading..."}
+        noOptionsMessage={() => "No options found"}
+        styles={customSelectStyles}
+        className="basic-multi-select"
+        classNamePrefix="select"
+      />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   );
+};
+
+// Match existing modal styles
+const customSelectStyles = {
+  control: (base) => ({
+    ...base,
+    borderColor: '#e2e8f0',
+    borderRadius: '0.375rem',
+    minHeight: '40px',
+    '&:hover': {
+      borderColor: '#cbd5e1'
+    }
+  }),
+  input: (base) => ({
+    ...base,
+    color: '#1e293b'
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: '#94a3b8'
+  }),
+  menu: (base) => ({
+    ...base,
+    borderRadius: '0.375rem',
+    boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)'
+  }),
+  option: (base, { isFocused }) => ({
+    ...base,
+    backgroundColor: isFocused ? '#f8fafc' : '#ffffff',
+    color: '#1e293b',
+    '&:active': {
+      backgroundColor: '#f1f5f9'
+    }
+  })
 };
 
 export default Dropdown;

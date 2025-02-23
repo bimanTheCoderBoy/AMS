@@ -18,6 +18,7 @@ exports.createClassroom=classroomController.createClassroom
 exports.getAllClassrooms=classroomController.getAllClassrooms
 exports.updateClassroom=classroomController.updateClassroom
 exports.deleteClassroom=classroomController.deleteClassroom
+exports.getClassroom=classroomController.getClassroom
 
 //! department CRUD operations
 exports.createDepartment = catchAsync(async (req, res, next) => {
@@ -436,7 +437,7 @@ exports.getClass = catchAsync(async (req, res, next) => {
                 { path: 'semester_id' }
             ]
         })
-        .populate('subject_id');  // Populate full subject details
+        .populate('subject_id');  
 
     if (!classData) {
         return next(new ApiError('Class not found', 404));
@@ -447,7 +448,30 @@ exports.getClass = catchAsync(async (req, res, next) => {
         data: classData
     });
 });
+exports.getClassesByClassroom=catchAsync(async(req,res,next)=>{
+    
 
+    let classes = await Class.find({classroom_id:req.params.id}).populate('subject_id');
+    if(!classes){
+        return next(new ApiError('Class not found', 404));
+    }
+    classes=classes.map((ele)=>{
+        return {
+            _id:ele._id,
+            classroom_id:ele.classroom_id,
+            subject:{
+                _id:ele.subject_id._id,
+                name:ele.subject_id.name,
+                code:ele.subject_id.code
+            }
+        }
+    })
+    res.status(200).json({
+        status:'success',
+        results:classes.length,
+        data:classes
+        });
+})
 exports.createClass = catchAsync(async (req, res, next) => {
     const { classroom_id, subject_id } = req.body;
 

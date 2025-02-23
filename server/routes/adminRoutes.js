@@ -43,7 +43,7 @@ router.delete('/subjects/:id', adminController.deleteSubject);
 // Classroom routes
 router.post('/classrooms', adminController.createClassroom);
 router.get('/classrooms', adminController.getAllClassrooms);
-// router.get('/classrooms/:id', adminController.getClassroom);
+router.get('/classrooms/:id', adminController.getClassroom);
 router.put('/classrooms/:id', adminController.updateClassroom);
 router.delete('/classrooms/:id', adminController.deleteClassroom);
 
@@ -60,6 +60,7 @@ router.get('/classes', adminController.getAllClasses);
 router.get('/classes/:id', adminController.getClass);  
 router.put('/classes/:id', adminController.updateClass); 
 router.delete('/classes/:id', adminController.deleteClass); 
+router.get('/classes/classroom/:id', adminController.getClassesByClassroom); 
 
 // Admin routes
 router.get('/admins', adminController.getAllAdmins);  
